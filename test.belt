@@ -1,0 +1,45 @@
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+coal
+drill 7
+drill 4
+
+set_put 3 
+press
+
+set_put pull
+press
+press
+
+set_put 10 !max non 0 pointer movement
+press
+
+set_mul 
+press
+
+low_pressure_switch 50 ! 3 skip + 2bar, controlls how much non 0 values can move the pointer.
+move_belt 3
+
+!space for 2 intstr.
+
+!below zero section
+move_belt pull !either min 10, or 0
+!zero section
+
+!>0 section
+
+
