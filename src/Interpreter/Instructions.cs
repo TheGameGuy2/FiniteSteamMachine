@@ -19,7 +19,9 @@ public enum InstructType : byte
     Move,
     SetContainer,
     LoadContainer,
-    DisconnectContainer
+    DisconnectContainer,
+    SwitchBelt,
+    PushBeltID
 
 }
 

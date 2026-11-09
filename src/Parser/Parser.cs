@@ -8,12 +8,16 @@ public class Parser
 {
     
     private List<string> code;
-    private List<Instruction> outInstructions = new();
 
-    private Dictionary<string, InstructType> instrMap;
+    private static Dictionary<string, InstructType> instrMap;
+    private static Dictionary<string, int> beltMap = new(); //Mapping file names to belt ids (indicies)
+    private static int beltCounter = 0; //used for belt id'S
 
-    public Parser(string text)
+    private static List<List<Instruction>> instructionBelts = new();
+
+    public Parser(string text, string fileName)
     {
+        beltMap.Add(fileName, beltCounter);
         code = text.Split("\n").ToList();
 
         instrMap = new() {
@@ -33,14 +37,20 @@ public class Parser
             {"pull", InstructType.Pull}, //pull value from the operation stack and push to output stack.
             {"set_container", InstructType.SetContainer}, //sets current container for the release valve
             {"load_container", InstructType.LoadContainer}, //loads current container into boiler
-            {"disconnect_container", InstructType.DisconnectContainer} //disconects current container
+            {"disconnect_container", InstructType.DisconnectContainer}, //disconects current container
+            {"switch_belt", InstructType.SwitchBelt}, //switch instruction belt to given file
+            {"push_belt_number", InstructType.PushBeltID}
         };
     }
 
 
-    public List<Instruction> Parse()
+    public List<List<Instruction>> Parse()
     {
         int lineCount = 1;
+
+        List<Instruction> outInstructions = new();
+        instructionBelts.Add(outInstructions);
+
         foreach(string line in code)
         {
             string cline = line.Trim();
@@ -58,14 +68,32 @@ public class Parser
                     //Has arg?
                     if(instrct.Length>1)
                     {
+                        if(instrct[0] == "switch_belt") //Is belt? (needs file parsing)
+                        {
+
+                            if(beltMap.TryGetValue(instrct[1], out int beltID))
+                            {
+                                MakeInstruction(outInstructions, InstructType.SwitchBelt, beltID);
+                            }
+                            else
+                            {
+                                beltCounter++;
+                                MakeInstruction(outInstructions, InstructType.SwitchBelt, beltCounter);
+                                Parser p = new(File.ReadAllText(instrct[1]), instrct[1]);
+                                p.Parse();
+                            }
+                            continue;
+                            
+                        }
+                        
                         //Is arg int?
                         if(int.TryParse(instrct[1], out int result))
                         {
-                            MakeInstruction(type, result);
+                            MakeInstruction(outInstructions, type, result);
                         }
                         else if(instrct[1] == "pull") //Is arg dynamic?
                         {
-                            MakeInstruction(type, 0, true);
+                            MakeInstruction(outInstructions, type, 0, true);
                         }
                         else //neither -> error
                         {
@@ -74,7 +102,7 @@ public class Parser
                     }
                     else
                     {
-                        MakeInstruction(type, 0);
+                        MakeInstruction(outInstructions, type, 0);
                     }
                     
                 }
@@ -89,11 +117,13 @@ public class Parser
             lineCount++;
             
         }
-
-        return outInstructions;
+        
+        return instructionBelts;
     }
 
-    private void MakeInstruction(InstructType type, int arg, bool pullValue = false)
+    
+
+    private void MakeInstruction(List<Instruction> outInstructions, InstructType type, int arg, bool pullValue = false)
     {
         outInstructions.Add(new(type, arg){pullValue = pullValue});
     }

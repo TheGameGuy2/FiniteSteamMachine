@@ -4,9 +4,9 @@ using FiniteSteamMachine.Parser;
 
 
 
-Parser parser = new(File.ReadAllText(args[0]));
+Parser parser = new(File.ReadAllText(args[0]), args[0]);
 
-List<Instruction> instructions = parser.Parse();
+List<List<Instruction>> instructions = parser.Parse();
 
 
 SteamMachine steamMachine = new(instructions);

@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Reflection.Metadata;
 using FiniteSteamMachine.Exceptions;
 
@@ -172,21 +173,35 @@ public struct SteamPress
     }
 }
 
+internal sealed class CodeBelt(int id, int pc, List<Instruction> instructions)
+{
+    public int id = id;
+    public int pc = pc;
+    public List<Instruction> instructions = instructions;
+}
+
 public sealed class SteamMachine
 {
 
-    private Instruction[] instructions;
-    private int pc = 0;
-
+    
+    private List<CodeBelt> belts = new();
+    private CodeBelt currentBelt;
 
     public Boiler boiler = new();
     public WaterPump pump = new();
     public SteamPress press = new();
     
 
-    public SteamMachine(List<Instruction> instructions)
+    public SteamMachine(List<List<Instruction>> instructions)
     {
-        this.instructions = instructions.ToArray();;
+        int idCount = 0;
+        foreach(List<Instruction> belt in instructions)
+        {
+            belts.Add(new(idCount, idCount == 0 ? 0 : -1, belt));
+            idCount++;
+        }
+
+        currentBelt = belts[0];
 
         boiler.water = 10;
         boiler.pressureLimit = 150;
@@ -206,8 +221,8 @@ public sealed class SteamMachine
                 $"Steam: {Math.Round(boiler.steam,4)}L{placeReserve}\n"+
                 $"Pressure: {Math.Round(boiler.pressure,4)}bar{$"{(boiler.pressure > 120 ? "<!>" : "")}"}{placeReserve}\n"+
                 $"{(boiler.selectedContainer > -1 ? $"Container({boiler.selectedContainer}): {boiler.steamContainers[boiler.selectedContainer]}bar" : "")}{placeReserve}\n"+
-                $"PC: {pc} {placeReserve}\n"+
-                $"Work: {(hasMoveAm ? " (move) " : " ")}{instructions[pc].type} {(instructions[pc].pullValue? $"pull ({press.pressStack.Peek()})" : instructions[pc].value)}{placeReserve}\n"
+                $"PC (belt {currentBelt.id}): {currentBelt.pc} {placeReserve}\n"+
+                $"Work: {(hasMoveAm ? " (move) " : " ")}{currentBelt.instructions[currentBelt.pc].type} {(currentBelt.instructions[currentBelt.pc].pullValue? $"pull ({press.pressStack.Peek()})" : currentBelt.instructions[currentBelt.pc].value)}{placeReserve}\n"
                 /*$"Stack: {((Func<string>)(() => {string s = ""; foreach(int val in press.pressStack.ToArray()){ s+=val.ToString();}return s;}))()}{placeReserve}"*/);
     }
 
@@ -221,7 +236,7 @@ public sealed class SteamMachine
         
         int moveAmount = 0;
 
-        while (pc < instructions.Length && pc >= 0)
+        while (currentBelt.pc < currentBelt.instructions.Count && currentBelt.pc >= 0)
         {
 
             int curTick = Environment.TickCount;
@@ -240,7 +255,7 @@ public sealed class SteamMachine
                 throw new BoilerExplosion();
             } 
 
-            Instruction current = instructions[pc]; 
+            Instruction current = currentBelt.instructions[currentBelt.pc]; 
             if(current.pullValue) 
             { 
                 current.value = press.pressStack.Peek(); 
@@ -253,7 +268,7 @@ public sealed class SteamMachine
                 {   
                     boiler.TakePressure(1);
                     int dir = int.CopySign(1, moveAmount);
-                    pc +=  dir;
+                    currentBelt.pc += dir;
                     moveAmount -= dir;
                     continue;
                 }
@@ -273,12 +288,12 @@ public sealed class SteamMachine
                 break;
 
                 case InstructType.AddCoal:
-                    boiler.coal += Math.Max(0,current.value); 
+                    boiler.coal += Math.Max(0, current.value); 
                 break;
 
                 case InstructType.SetValve:
                     
-                    boiler.releaseValve = Math.Max(0,current.value*0.1);
+                    boiler.releaseValve = Math.Max(0, current.value*0.1);
                 
                 break;
 
@@ -298,9 +313,19 @@ public sealed class SteamMachine
                     }
                 break;
                 
+                case InstructType.SwitchBelt:
+                    currentBelt = belts[current.value];
+                    if(currentBelt.pc+1 >= currentBelt.instructions.Count) {currentBelt.pc = -1;}
+                break;
+
+                case InstructType.PushBeltID:
+                    press.pressStack.Push(currentBelt.id);
+                    currentBelt.pc++;
+                continue;
 
                 case InstructType.Pull:
                     Console.WriteLine(press.pressStack.Pop());
+                    Console.ReadKey();
                 break;
 
                 case InstructType.Press:
@@ -338,10 +363,12 @@ public sealed class SteamMachine
             TickEnd();
 
             if(current.pullValue) { press.pressStack.Pop(); }
-            pc++;
+            currentBelt.pc++;
             
 
         }
+
+
     }
 
     private void TickEnd()
@@ -349,8 +376,14 @@ public sealed class SteamMachine
         boiler.TakePressure(boiler.releaseValve);
         if(boiler.selectedContainer > -1)
         {
+            if(boiler.pressure<boiler.releaseValve) 
+            {
+                boiler.steamContainers[boiler.selectedContainer] += boiler.pressure;
+                boiler.pressure = 0;
+                return;
+            }
+            else if(boiler.pressure>0){ boiler.steamContainers[boiler.selectedContainer] += boiler.releaseValve; }
             
-            boiler.steamContainers[boiler.selectedContainer] += boiler.releaseValve;
         }
     }
 
