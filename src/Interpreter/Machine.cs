@@ -12,11 +12,11 @@ public enum BoilerState
     Exploded
 }
 
-public struct Boiler()
+public struct Boiler(int containerAmount)
 {
     //Water in kg, steam out in L
     public double coal, water, steam, pressure, pressureLimit, releaseValve;
-    public double[] steamContainers = new double[32];
+    public double[] steamContainers = new double[containerAmount];
     public int selectedContainer = -1;
 
     public BoilerState Tick()
@@ -111,7 +111,7 @@ public struct SteamPress
     
     
 
-    private readonly double[] instrPressures = new double[12];
+    private readonly double[] instrPressures = new double[32];
     public SteamPress()
     {
         instrPressures[(int)InstructType.None] = 0;
@@ -120,6 +120,8 @@ public struct SteamPress
         instrPressures[(int)InstructType.Sub] = 1;
         instrPressures[(int)InstructType.Mul] = 2;
         instrPressures[(int)InstructType.Div] = 2;
+        instrPressures[(int)InstructType.PrintChar] = 1;
+
     }
     
 
@@ -168,6 +170,10 @@ public struct SteamPress
                 b = pressStack.Pop();
                 pressStack.Push(b/a);
             break;
+
+            case InstructType.PrintChar:
+                Console.WriteLine((char)pressStack.Pop());
+            break;
             
         }
     }
@@ -181,19 +187,21 @@ internal sealed class CodeBelt(int id, int pc, List<Instruction> instructions)
 }
 
 public sealed class SteamMachine
-{
-
-    
+{   
     private List<CodeBelt> belts = new();
     private CodeBelt currentBelt;
 
-    public Boiler boiler = new();
-    public WaterPump pump = new();
-    public SteamPress press = new();
+    private Boiler boiler;
+    private WaterPump pump = new();
+    private SteamPress press = new();
     
 
-    public SteamMachine(List<List<Instruction>> instructions)
+    public SteamMachine(List<List<Instruction>> instructions, int containerAmount)
     {
+        boiler = new(containerAmount);
+        boiler.water = 10;
+        boiler.pressureLimit = 150;
+
         int idCount = 0;
         foreach(List<Instruction> belt in instructions)
         {
@@ -202,9 +210,6 @@ public sealed class SteamMachine
         }
 
         currentBelt = belts[0];
-
-        boiler.water = 10;
-        boiler.pressureLimit = 150;
         
     }
 
@@ -226,7 +231,7 @@ public sealed class SteamMachine
                 /*$"Stack: {((Func<string>)(() => {string s = ""; foreach(int val in press.pressStack.ToArray()){ s+=val.ToString();}return s;}))()}{placeReserve}"*/);
     }
 
-    public void Execute(bool manualTick = false, int tickDelay = 0)
+    public void Execute(bool showDisplay = true, bool manualTick = false, int tickDelay = 0)
     {
 
         Console.CursorVisible = false;
@@ -239,13 +244,18 @@ public sealed class SteamMachine
         while (currentBelt.pc < currentBelt.instructions.Count && currentBelt.pc >= 0)
         {
 
-            int curTick = Environment.TickCount;
-
-            if(manualTick) {Console.ReadKey();}
+            if(manualTick) { Console.ReadKey(); }
             
-            DisplayState(resetPos, moveAmount != 0);
+            if(showDisplay)
+            {
+                DisplayState(resetPos, moveAmount != 0);
+            }
             
-            Thread.Sleep(Math.Max(0,tickDelay-(Environment.TickCount-curTick)));
+            if(tickDelay>0)
+            {
+                Thread.Sleep(tickDelay);
+            }
+            
 
             BoilerState boilerState = boiler.Tick();
 
@@ -324,7 +334,6 @@ public sealed class SteamMachine
 
                 case InstructType.Pull:
                     Console.WriteLine(press.pressStack.Pop());
-                    Console.ReadKey();
                 break;
 
                 case InstructType.Press:
@@ -354,7 +363,6 @@ public sealed class SteamMachine
 
                 default:
                     press.current = current;
-                    
                 break;
 
             }
@@ -366,7 +374,8 @@ public sealed class SteamMachine
             
 
         }
-
+        
+        Console.CursorVisible = true;
 
     }
 

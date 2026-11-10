@@ -39,7 +39,8 @@ public class Parser
             {"load_container", InstructType.LoadContainer}, //loads current container into boiler
             {"disconnect_container", InstructType.DisconnectContainer}, //disconects current container
             {"switch_belt", InstructType.SwitchBelt}, //switch instruction belt to given file
-            {"push_belt_number", InstructType.PushBeltID}
+            {"push_belt_number", InstructType.PushBeltID},
+            {"set_write_chr", InstructType.PrintChar}
         };
     }
 

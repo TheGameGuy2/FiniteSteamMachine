@@ -21,7 +21,8 @@ public enum InstructType : byte
     LoadContainer,
     DisconnectContainer,
     SwitchBelt,
-    PushBeltID
+    PushBeltID,
+    PrintChar,
 
 }
 
