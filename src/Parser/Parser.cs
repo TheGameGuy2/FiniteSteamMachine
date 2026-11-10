@@ -70,8 +70,15 @@ public class Parser
                     {
                         if(instrct[0] == "switch_belt") //Is belt? (needs file parsing)
                         {
-
-                            if(beltMap.TryGetValue(instrct[1], out int beltID))
+                            if(instrct[1] == "pull")
+                            {
+                                MakeInstruction(outInstructions, InstructType.SwitchBelt, 0, true);
+                            }
+                            else if(int.TryParse(instrct[1], out int belt))
+                            {
+                                MakeInstruction(outInstructions, InstructType.SwitchBelt, belt);
+                            }
+                            else if(beltMap.TryGetValue(instrct[1], out int beltID))
                             {
                                 MakeInstruction(outInstructions, InstructType.SwitchBelt, beltID);
                             }

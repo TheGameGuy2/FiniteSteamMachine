@@ -165,7 +165,7 @@ public struct SteamPress
 
             case InstructType.Div:
                 a = pressStack.Pop();
-                b = pressStack.Pop(); 
+                b = pressStack.Pop();
                 pressStack.Push(b/a);
             break;
             
@@ -247,7 +247,6 @@ public sealed class SteamMachine
             
             Thread.Sleep(Math.Max(0,tickDelay-(Environment.TickCount-curTick)));
 
-
             BoilerState boilerState = boiler.Tick();
 
             if(boilerState == BoilerState.Exploded)
@@ -294,7 +293,7 @@ public sealed class SteamMachine
                 case InstructType.SetValve:
                     
                     boiler.releaseValve = Math.Max(0, current.value*0.1);
-                
+                    
                 break;
 
                 case InstructType.WaitForPressureHigh:
@@ -373,17 +372,27 @@ public sealed class SteamMachine
 
     private void TickEnd()
     {
-        boiler.TakePressure(boiler.releaseValve);
+        
+
         if(boiler.selectedContainer > -1)
         {
             if(boiler.pressure<boiler.releaseValve) 
             {
                 boiler.steamContainers[boiler.selectedContainer] += boiler.pressure;
                 boiler.pressure = 0;
+                boiler.steam = 0;
                 return;
             }
-            else if(boiler.pressure>0){ boiler.steamContainers[boiler.selectedContainer] += boiler.releaseValve; }
+            else if(boiler.pressure>0)
+            { 
+                boiler.steamContainers[boiler.selectedContainer] += boiler.releaseValve;
+                boiler.TakePressure(boiler.releaseValve);
+            }
             
+        }
+        else
+        {
+            boiler.TakePressure(boiler.releaseValve);
         }
     }
 
