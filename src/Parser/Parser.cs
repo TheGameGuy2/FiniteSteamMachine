@@ -11,7 +11,7 @@ public class Parser
 
     private static Dictionary<string, InstructType> instrMap;
     private static Dictionary<string, int> beltMap = new(); //Mapping file names to belt ids (indicies)
-    private static int beltCounter = 0; //used for belt id'S
+    private static int beltCounter = 0; //used for belt id's
 
     private static List<List<Instruction>> instructionBelts = new();
 
