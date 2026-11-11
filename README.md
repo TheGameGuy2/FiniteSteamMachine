@@ -15,6 +15,8 @@
 <li>containers: amount of steam containers, default value is 32</li>
 </ul>
 
+<h2>Instructions...</h2>
+
 <h2>Understanding the Machine</h2>
 <p>To start working with the machine, you first have to understand what the levers and switches even do. 
 This is a lot to take in at once, so feel free to skim over this part and look at the examples.</p>
@@ -30,13 +32,13 @@ This is a lot to take in at once, so feel free to skim over this part and look a
 </ul>
 
 <h3>The Boiler</h3>
-<hl>
+<hr>
 <p>This is the most important component of the steam machine.</p>
 <p>The boiler generates steam and thus pressure every tick (before every instruction).
-It also has a maximum pressure at which it explodes and throws a <code>BoilerExplosion</code> exception. 
+It has a maximum pressure at which it explodes and throws a <code>BoilerExplosion</code> exception (default: 150bar). 
 Steam is generated if you have coal and water inside the boiler.</p>
 
-<h4>Every Tick:</h4>
+<b>Every Tick:</b>
 <p>
 Burns one coal:<br>
 <code>coal = coal - 1</code>
@@ -57,5 +59,84 @@ Steam creates pressure:<br>
 <code>pressure = pressure + new_steam/2</code>
 </p>
 
+<p>
+Don't worry, depending on what program you are writing, exact values won't be required. 
+This information is here in case you do want to write something more complicated. 
+</p>
 
-</code>
+<h3>Controll Valves</h3>
+<hr>
+<p>
+Controll valves allow you to controll and release pressure when needed.
+</p>
+
+<p>
+<code>high_pressure_switch [value/10 bar]</code><br>
+The high pressure switch pauses instruction execution while the pressure is less than the given value.<br>
+</p>
+
+<p>
+<code>low_pressure_switch [value/10 bar]</code><br>
+The low pressure switch pauses execution while the pressure is above the given value.
+</p>
+
+<p>
+<code>release_valve [value/10 bar]</code><br>
+The release valve releases the given pressure every tick, if a container is conected, the pressure is transfered there.
+</p>
+
+<i>Note: All valve values are expecting 1/10 bar as the standart unit.</i>
+
+<h3>Water Pump</h3>
+<hr>
+<p>
+<code>pump [bar]</code><br>
+The water pump uses pressure to pump water.
+The conversion rate from pressure to water is <code>added_water = pressure*0.8</code>.
+</p>
+
+<h3>Steam Press</h3>
+<hr>
+<p>The steam press is a state machine which uses a stack for its operations.</p>
+<p>Set instructions e.g. <code>set_add</code> set the current state
+and the <code>press</code> instruction executes the current state. Most instructions pop values off the stack.</p>
+<p>The amount of pressure needed for one <code>press</code> depends on the selected state.</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+<tr>
+<th>State</th>
+<th>Cost</th>
+</tr>
+
+<tr>
+<td><code>set_put</code></td>
+<td>0.5bar</td>
+</tr>
+
+<tr>
+<td><code>set_write_chr</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_add</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_sub</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_mul</code></td>
+<td>2bar</td>
+</tr>
+
+<tr>
+<td><code>set_div</code></td>
+<td>2bar</td>
+</tr>
+
+
+</table>
