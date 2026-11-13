@@ -120,7 +120,8 @@ public struct SteamPress
         instrPressures[(int)InstructType.Sub] = 1;
         instrPressures[(int)InstructType.Mul] = 2;
         instrPressures[(int)InstructType.Div] = 2;
-        instrPressures[(int)InstructType.PrintChar] = 1;
+        instrPressures[(int)InstructType.PrintChar] = 2;
+        instrPressures[(int)InstructType.ReadChar] = 1;
 
     }
     

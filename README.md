@@ -80,6 +80,12 @@
 </tr>
 
 <tr>
+<td><code>set_read_chr</code></td>
+<td>Sets steam press mode to character input.</td>
+<td>Pushes one input character from the console onto the stack on press.</td>
+</tr>
+
+<tr>
 <td><code>press</code></td>
 <td>Executes currently selected press mode or waits for enough pressure to built up.</td>
 <td>Uses the pressure corresponding to the current mode. 
