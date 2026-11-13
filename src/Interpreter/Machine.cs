@@ -278,6 +278,15 @@ public sealed class SteamMachine
                     boiler.TakePressure(1);
                     int dir = int.CopySign(1, moveAmount);
                     currentBelt.pc += dir;
+
+                    if(currentBelt.pc >= currentBelt.instructions.Count){ break; }
+                    else if(currentBelt.pc <= 0) 
+                    { 
+                        currentBelt.pc = 0;
+                        moveAmount = 0; 
+                        continue; 
+                    }
+
                     moveAmount -= dir;
                     continue;
                 }
