@@ -23,6 +23,7 @@ public enum InstructType : byte
     SwitchBelt,
     PushBeltID,
     PrintChar,
+    ReadChar
 
 }
 

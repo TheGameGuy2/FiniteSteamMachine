@@ -40,7 +40,8 @@ public class Parser
             {"disconnect_container", InstructType.DisconnectContainer}, //disconects current container
             {"switch_belt", InstructType.SwitchBelt}, //switch instruction belt to given file
             {"push_belt_number", InstructType.PushBeltID},
-            {"set_write_chr", InstructType.PrintChar}
+            {"set_write_chr", InstructType.PrintChar},
+            {"set_read_chr", InstructType.ReadChar}
         };
     }
 

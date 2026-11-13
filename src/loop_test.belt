@@ -20,6 +20,7 @@ coal
 coal
 high_pressure_switch 150
 
+
 set_put 1
 press
 press

@@ -174,6 +174,10 @@ public struct SteamPress
             case InstructType.PrintChar:
                 Console.WriteLine((char)pressStack.Pop());
             break;
+
+            case InstructType.ReadChar:
+                pressStack.Push(Console.Read());
+            break;
             
         }
     }

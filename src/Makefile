@@ -2,7 +2,7 @@ run_manual:
 	reset && dotnet run new.belt true 10
 
 run_auto:
-	reset && dotnet run test2.belt false 10
+	reset && dotnet run new.belt false 10 -no-display
 
 run_test:
 	reset && dotnet run v_bugs.belt false 500
