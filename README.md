@@ -31,6 +31,59 @@ This is a lot to take in at once, so feel free to skim over this part and look a
 <li>Belts which transport instructions</li>
 </ul>
 
+<h3>Steam Press</h3>
+<hr>
+<p>The steam press is a state machine which uses a stack for its operations.</p>
+<p>Set instructions e.g. <code>set_add</code> set the current state
+and the <code>press</code> instruction executes the current state. Most instructions pop values off the stack.</p>
+<p>The amount of pressure needed for one <code>press</code> depends on the selected state.</p>
+
+<table border="1" cellpadding="8" cellspacing="0">
+<tr>
+<th>State</th>
+<th>Cost</th>
+</tr>
+
+<tr>
+<td><code>set_put</code></td>
+<td>0.5bar</td>
+</tr>
+
+<tr>
+<td><code>set_write_chr</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_add</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_sub</code></td>
+<td>1bar</td>
+</tr>
+
+<tr>
+<td><code>set_mul</code></td>
+<td>2bar</td>
+</tr>
+
+<tr>
+<td><code>set_div</code></td>
+<td>2bar</td>
+</tr>
+
+</table>
+
+<h3>Water Pump</h3>
+<hr>
+<p>
+<code>pump [bar]</code><br>
+The water pump uses pressure to pump water.
+The conversion rate from pressure to water is <code>added_water = pressure*0.8</code>.
+</p>
+
 <h3>The Boiler</h3>
 <hr>
 <p>This is the most important component of the steam machine.</p>
@@ -87,56 +140,36 @@ The release valve releases the given pressure every tick, if a container is cone
 
 <i>Note: All valve values are expecting 1/10 bar as the standart unit.</i>
 
-<h3>Water Pump</h3>
+
+<h3>Steam Containers</h3>
 <hr>
+
+<p>Steam containers can be used to store an unlimited amount of steam. 
+The release valve removes a given amount of steam per tick, if a container is selected <code>set_container [index]</code>,
+the steam gets transported into the currently selected container. 
+
 <p>
-<code>pump [bar]</code><br>
-The water pump uses pressure to pump water.
-The conversion rate from pressure to water is <code>added_water = pressure*0.8</code>.
+<code>load_container</code> loads all of the steam stored in one container back into the boiler.
 </p>
 
-<h3>Steam Press</h3>
+<p>You can disconnect a container with <code>disconnect_container</code>.</p>
+</p>
+
+<h3>Instruction Belts</h3>
 <hr>
-<p>The steam press is a state machine which uses a stack for its operations.</p>
-<p>Set instructions e.g. <code>set_add</code> set the current state
-and the <code>press</code> instruction executes the current state. Most instructions pop values off the stack.</p>
-<p>The amount of pressure needed for one <code>press</code> depends on the selected state.</p>
 
-<table border="1" cellpadding="8" cellspacing="0">
-<tr>
-<th>State</th>
-<th>Cost</th>
-</tr>
+<p>
+Every FiniteSteamMachine file represents one transport belt holding instructions.
+Each belt gets assigned a numerical ID which can be pushed on the press stack with <code>push_belt_number</code>.<br>
+You can switch belts with <code>switch_belt [filename | beltID]</code><br>
+<i>Note: file names get resolved to numerical IDs during compile time.</i>
 
-<tr>
-<td><code>set_put</code></td>
-<td>0.5bar</td>
-</tr>
-
-<tr>
-<td><code>set_write_chr</code></td>
-<td>1bar</td>
-</tr>
-
-<tr>
-<td><code>set_add</code></td>
-<td>1bar</td>
-</tr>
-
-<tr>
-<td><code>set_sub</code></td>
-<td>1bar</td>
-</tr>
-
-<tr>
-<td><code>set_mul</code></td>
-<td>2bar</td>
-</tr>
-
-<tr>
-<td><code>set_div</code></td>
-<td>2bar</td>
-</tr>
+<p>
+A belt stores its current program counter when switching to another belt. 
+Program execution stops when the end of the current belt is reached.
+If the belt the program switches to is at its end, the belt's program counter gets reset.
+</p>
+</p>
 
 
-</table>
+
