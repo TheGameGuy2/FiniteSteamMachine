@@ -96,13 +96,13 @@
 </tr>
 
 <tr>
-<td><code>high_pressure_switch [value]</code></td>
+<td style="white-space: nowrap;"><code>high_pressure_switch [value]</code></td>
 <td>Pauses instruction execution while pressure is below value.</td>
 <td>value: amount of pressure in 0.1 bar units (&gt 0).</td>
 </tr>
 
 <tr>
-<td><code>low_pressure_switch [value]</code></td>
+<td style="white-space: nowrap;"><code>low_pressure_switch [value]</code></td>
 <td>Pauses instruction execution while pressure is above value.</td>
 <td>value: amount of pressure in 0.1 bar units (&gt 0).</td>
 </tr>
@@ -136,7 +136,7 @@ negative values move the counter towards the start of the file.</td>
 </tr>
 
 <tr>
-<td><code>switch_belt [filename | beltID]</code></td>
+<td style="white-space: nowrap;"><code>switch_belt [filename | beltID]</code></td>
 <td>Switches execution state to a different belt. 
 The program counter is saved and execution is resumed at the saved program counter when switching to a belt.
 If the end of a belt is reached without a switch, program execution ends. 
@@ -274,17 +274,17 @@ Control valves allow you to manage pressure when needed.
 </p>
 
 <p>
-<code>high_pressure_switch [value/10 bar]</code><br>
+<p><code>high_pressure_switch [value/10 bar]</code><br></p>
 The high pressure switch pauses instruction execution while the pressure is less than the given value.<br>
 </p>
 
 <p>
-<code>low_pressure_switch [value/10 bar]</code><br>
+<p><code>low_pressure_switch [value/10 bar]</code><br></p>
 The low pressure switch pauses execution while the pressure is above the given value.
 </p>
 
 <p>
-<code>release_valve [value/10 bar]</code><br>
+<p><code>release_valve [value/10 bar]</code><br></p>
 The release valve releases the given pressure every tick, if a container is conected, the pressure is transfered there.
 </p>
 
