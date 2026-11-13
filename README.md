@@ -21,6 +21,9 @@
 
 <h2>Instructions</h2>
 <p><i>Info: Arguments enclosed in '[' ']' are written as positive or negative integers without brackets.</i></p>
+
+<p>Comments: <code>! This is a comment </code></p>
+
 <table border="1" cellpadding="8" cellspacing="0">
 <tr>
 <th>Instruction</th>
@@ -157,13 +160,14 @@ All file names get replaced by belt ids during compilation.</td>
 <p>Note: all instructions accepting arguments also accept <code>pull</code> as a possible argument. 
 If provided, it pops a value of the press stack and uses it as the input value.</p>
 
+
 <h2>Understanding the Machine</h2>
 <p>To start working with the machine, you first have to understand what the levers and switches even do. 
 This is a lot to take in at once, so feel free to skim over this part and look at the examples.</p>
 <p>The steam machine being simulated isn't very realistic. 
 This language is supposed to be less of a simulation than a new perspective and chalange on programing.
 That's why instructions use just pressure as their requirements and pressure drops by the required amount.
-This was instroduced to make dealing with the machine easier, because it already is complex enough in its simplified form.</p>
+This was instroduced to make dealing with the machine easier, it already is complex enough in its simplified form.</p>
 
 
 <p>The machine consists of the following components:<p>
