@@ -96,13 +96,13 @@
 </tr>
 
 <tr>
-<td style="white-space: nowrap;"><code>high_pressure_switch [value]</code></td>
+<td><code><nobr>high_pressure_switch [value]</nobr></code></td>
 <td>Pauses instruction execution while pressure is below value.</td>
 <td>value: amount of pressure in 0.1 bar units (&gt 0).</td>
 </tr>
 
 <tr>
-<td style="white-space: nowrap;"><code>low_pressure_switch [value]</code></td>
+<td><code><nobr>low_pressure_switch [value]</nobr></code></td>
 <td>Pauses instruction execution while pressure is above value.</td>
 <td>value: amount of pressure in 0.1 bar units (&gt 0).</td>
 </tr>
@@ -136,7 +136,7 @@ negative values move the counter towards the start of the file.</td>
 </tr>
 
 <tr>
-<td style="white-space: nowrap;"><code>switch_belt [filename | beltID]</code></td>
+<td><code><nobr>switch_belt [filename | beltID]</nobr></code></td>
 <td>Switches execution state to a different belt. 
 The program counter is saved and execution is resumed at the saved program counter when switching to a belt.
 If the end of a belt is reached without a switch, program execution ends. 
