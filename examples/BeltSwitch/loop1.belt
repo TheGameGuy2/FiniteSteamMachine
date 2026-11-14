@@ -1,0 +1,13 @@
+!! In this example we count to 4 using belt switches.
+
+coal 25
+
+set_put 1
+press
+pull
+
+switch_belt loop2.belt
+
+set_put 4
+press
+pull

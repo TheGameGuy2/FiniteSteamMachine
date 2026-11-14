@@ -65,3 +65,8 @@ set_write_chr
 press !! 2 bar
 
 move_belt -2 !! 2 bar if not skipped.
+
+!! Now you saw how conditional loops could be implemented. 
+!! This is a simple example, because our character amount doesn't require a lot of pressure,
+!! if we would have more characters, we would have to come up with a way to generate steam inside the loop
+!! or load it from containers. Keep in mind: max pressure is 150bar.

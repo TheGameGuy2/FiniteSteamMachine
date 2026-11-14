@@ -1,0 +1,5 @@
+set_put 3
+press
+pull
+
+switch_belt loop1.belt
