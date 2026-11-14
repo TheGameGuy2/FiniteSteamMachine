@@ -152,7 +152,7 @@ negative values move the counter towards the start of the file.</td>
 The program counter is saved and execution is resumed at the saved program counter when switching to a belt.
 If the end of a belt is reached without a switch, program execution ends. 
 If the target belt's program counter is at the end when switched to, the counter gets reset.</td>
-<td>Filename: Name/path (without spaces!) of a file relative to the main file. 
+<td>Filename: Name/path of a file relative to the working directory. 
 All file names get replaced by belt ids during compilation.</td>
 </tr>
 
@@ -335,7 +335,8 @@ the steam gets transported into the currently selected container.
 Every FiniteSteamMachine file represents one transport belt holding instructions.<br>
 <p>Each belt gets assigned a numerical ID which can be pushed on the press stack with <code>push_belt_number</code>.</p>
 <p>You can switch belts with <code>switch_belt [filename | beltID]</code>.
-<i>Note: file names get resolved to numerical IDs during compile time.</i>
+<i>Note: file names get resolved to numerical IDs during compile time. 
+The file paths have to be relative to the current working directory, though this is subject to change.</i>
 </p>
 
 <p>
