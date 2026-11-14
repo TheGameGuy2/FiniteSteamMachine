@@ -1,188 +1,28 @@
 using System.Data.Common;
+using System.Net;
 using System.Reflection.Metadata;
+using System.Text;
 using FiniteSteamMachine.Exceptions;
 
 namespace FiniteSteamMachine.Interpreter;
 
 
-public enum BoilerState
-{
-    Ok,
-    NoCoal,
-    Exploded
-}
 
-public struct Boiler(int containerAmount)
-{
-    //Water in kg, steam out in L
-    public double coal, water, steam, pressure, pressureLimit, releaseValve;
-    public double[] steamContainers = new double[containerAmount];
-    public int selectedContainer = -1;
-
-    public BoilerState Tick()
-    {
-        if(coal>0) { coal--; }
-        else {return BoilerState.NoCoal;}
-
-        double newSteam = 0.01*(coal*coal);
-
-        if(water-newSteam>0) 
-        { 
-            water -= newSteam*0.2d; 
-        }
-        else 
-        {
-            newSteam = water/0.2d;
-            water = 0;
-        }
-        
-        steam += newSteam;
-        pressure += newSteam/2;
-
-        if(pressure > pressureLimit)
-        {
-            return BoilerState.Exploded;
-        }
-
-        return BoilerState.Ok;
-    }
-
-    public void AddPressure(double pressure)
-    {
-        this.pressure += pressure;
-        steam += pressure*2;
-        if(this.pressure>pressureLimit) { throw new BoilerExplosion(); }
-    }
-
-    /// <summary>
-    /// Takes pressure for work and adjusts steam volume accordingly
-    /// </summary>
-    public void TakePressure(double pressure)
-    {
-        if(this.pressure - pressure >= 0)
-        {
-            this.pressure -= pressure;
-            steam -= pressure*2;
-        }
-        else
-        {
-            this.pressure = 0;
-            steam = 0;
-        }
-    }
-
-}
-
-public struct WaterPump()
-{
-    public bool Pump(ref Boiler boiler, double usedPressure)
-    {
-        if(boiler.pressure >= usedPressure)
-        {
-            boiler.TakePressure(usedPressure);
-            boiler.water += usedPressure*0.8;
-            return true;
-        }
-        return false;
-    }
-}
-
-public struct CoalDrill()
+public class CoalDrill
 {
     public double pressurePerCoal = 2;
 
-    public bool Drill(ref Boiler boiler, double inputPressure)
+    public bool Drill(Boiler boiler, double inputPressure)
     {
         if(boiler.pressure>=inputPressure)
         {
-
-            boiler.coal += Math.Floor(inputPressure);
-            
+            boiler.coal += Math.Floor(inputPressure);   
             return true;
         }
         return false;
     }
 }
 
-public struct SteamPress
-{
-    public Instruction current;
-    public Stack<int> pressStack = new(32);
-    
-    
-
-    private readonly double[] instrPressures = new double[32];
-    public SteamPress()
-    {
-        instrPressures[(int)InstructType.None] = 0;
-        instrPressures[(int)InstructType.Put] = 0.5;
-        instrPressures[(int)InstructType.Add] = 1;
-        instrPressures[(int)InstructType.Sub] = 1;
-        instrPressures[(int)InstructType.Mul] = 2;
-        instrPressures[(int)InstructType.Div] = 2;
-        instrPressures[(int)InstructType.PrintChar] = 2;
-        instrPressures[(int)InstructType.ReadChar] = 1;
-
-    }
-    
-
-    /// <returns>Successfull/!Successfull</returns> 
-    public bool Press(ref Boiler boiler)
-    {
-
-        double neededPressure = instrPressures[(int)current.type];
-
-        if(boiler.pressure >= neededPressure)
-        {
-            boiler.TakePressure(neededPressure);
-            Execute();
-            return true;
-        }
-        return false;
-    }
-
-
-
-    private void Execute()
-    {
-        
-        switch(current.type)
-        {
-            case InstructType.Put:
-                pressStack.Push(current.value);
-            break;
-
-            case InstructType.Add:
-                pressStack.Push(pressStack.Pop()+pressStack.Pop());
-            break;
-
-            case InstructType.Sub:
-                int a = pressStack.Pop();
-                int b = pressStack.Pop();
-                pressStack.Push(b-a);
-            break;
-
-            case InstructType.Mul:
-                pressStack.Push(pressStack.Pop()*pressStack.Pop());
-            break;
-
-            case InstructType.Div:
-                a = pressStack.Pop();
-                b = pressStack.Pop();
-                pressStack.Push(b/a);
-            break;
-
-            case InstructType.PrintChar:
-                Console.WriteLine((char)pressStack.Pop());
-            break;
-
-            case InstructType.ReadChar:
-                pressStack.Push(Console.Read());
-            break;
-            
-        }
-    }
-}
 
 internal sealed class CodeBelt(int id, int pc, List<Instruction> instructions)
 {
@@ -201,6 +41,11 @@ public sealed class SteamMachine
     private SteamPress press = new();
     
 
+    private string placeReserve = 
+                "                                      "+
+                "                                      ";
+    private StringBuilder outputBuilder = new(1024);
+
     public SteamMachine(List<List<Instruction>> instructions, int containerAmount)
     {
         boiler = new(containerAmount);
@@ -218,22 +63,51 @@ public sealed class SteamMachine
         
     }
 
-
-    private string placeReserve = 
-                "                                      "+
-                "                                      ";
-    private void DisplayState((int,int) resetPos, bool hasMoveAm)
+    private void DisplayState(bool hasMoveAm)
     {
-        Console.SetCursorPosition(resetPos.Item1, resetPos.Item2-1);
-            Console.WriteLine(
-                $"Water: {Math.Round(boiler.water,4)}L{placeReserve}\n"+
-                $"Coal: {Math.Round(boiler.coal,4)}kg{placeReserve}\n" +
-                $"Steam: {Math.Round(boiler.steam,4)}L{placeReserve}\n"+
-                $"Pressure: {Math.Round(boiler.pressure,4)}bar{$"{(boiler.pressure > 120 ? "<!>" : "")}"}{placeReserve}\n"+
-                $"{(boiler.selectedContainer > -1 ? $"Container({boiler.selectedContainer}): {boiler.steamContainers[boiler.selectedContainer]}bar" : "")}{placeReserve}\n"+
-                $"PC (belt {currentBelt.id}): {currentBelt.pc} {placeReserve}\n"+
-                $"Work: {(hasMoveAm ? " (move) " : " ")}{currentBelt.instructions[currentBelt.pc].type} {(currentBelt.instructions[currentBelt.pc].pullValue? $"pull ({press.pressStack.Peek()})" : currentBelt.instructions[currentBelt.pc].value)}{placeReserve}\n"
-                /*$"Stack: {((Func<string>)(() => {string s = ""; foreach(int val in press.pressStack.ToArray()){ s+=val.ToString();}return s;}))()}{placeReserve}"*/);
+        var resetPos = Console.GetCursorPosition();
+
+        outputBuilder.Clear();
+
+        outputBuilder.AppendFormat("Water: {0}L{1}\n", Math.Round(boiler.water, 4), placeReserve);
+        outputBuilder.AppendFormat("Coal: {0}kg{1}\n", Math.Round(boiler.coal, 4), placeReserve);
+        outputBuilder.AppendFormat("Steam: {0}L{1}\n", Math.Round(boiler.steam, 4), placeReserve);
+        outputBuilder.AppendFormat("Pressure: {0}bar ", Math.Round(boiler.pressure, 4));
+        
+        if(boiler.pressure > 120)
+        {
+            outputBuilder.Append("<!>");
+        }
+        outputBuilder.AppendFormat("{0}\n", placeReserve);
+
+        if(boiler.selectedContainer > -1)
+        {
+            outputBuilder.AppendFormat("Container({0}): {1}bar {2}\n", boiler.selectedContainer, boiler.steamContainers[boiler.selectedContainer], placeReserve);
+        }
+
+        outputBuilder.AppendFormat("PC (belt {0}): {1}{2}\n", currentBelt.id, currentBelt.pc, placeReserve);
+        
+        outputBuilder.Append("Work: ");
+        if(hasMoveAm)
+        {
+            outputBuilder.Append("(move) ");
+        }
+
+        outputBuilder.Append(currentBelt.instructions[currentBelt.pc].type);
+        
+        if(currentBelt.instructions[currentBelt.pc].pullValue)
+        {
+            outputBuilder.AppendFormat(" pull ({0}){1}\n", press.pressStack.Peek(), placeReserve);
+        }
+        else
+        {
+            outputBuilder.AppendFormat(" {0}{1}\n", currentBelt.instructions[currentBelt.pc].value, placeReserve);
+        }
+        
+
+        Console.Write(outputBuilder);
+        Console.SetCursorPosition(resetPos.Left, resetPos.Top);
+        /*$"Stack: {((Func<string>)(() => {string s = ""; foreach(int val in press.pressStack.ToArray()){ s+=val.ToString();}return s;}))()}{placeReserve}");*/
     }
 
     public void Execute(bool showDisplay = true, bool manualTick = false, int tickDelay = 0)
@@ -241,8 +115,6 @@ public sealed class SteamMachine
 
         Console.CursorVisible = false;
         Console.WriteLine("");
-
-        var resetPos = Console.GetCursorPosition();
         
         int moveAmount = 0;
 
@@ -253,10 +125,18 @@ public sealed class SteamMachine
             
             if(showDisplay)
             {
-                DisplayState(resetPos, moveAmount != 0);
+                DisplayState(moveAmount != 0);
+            }
+            else
+            {
+                if(press.consoleOutput != '\0')
+                {  
+                    Console.Write(press.consoleOutput);
+                    press.consoleOutput = '\0';
+                }
             }
             
-            if(tickDelay>0)
+            if(tickDelay > 0)
             {
                 Thread.Sleep(tickDelay);
             }
@@ -278,13 +158,17 @@ public sealed class SteamMachine
             if(moveAmount != 0)
             {
                 TickEnd();
-                if(boiler.pressure>=1)
+                if(boiler.pressure >= 1)
                 {   
                     boiler.TakePressure(1);
+
                     int dir = int.CopySign(1, moveAmount);
                     currentBelt.pc += dir;
 
-                    if(currentBelt.pc >= currentBelt.instructions.Count){ break; }
+                    if(currentBelt.pc >= currentBelt.instructions.Count)
+                    { 
+                        break; 
+                    }
                     else if(currentBelt.pc <= 0) 
                     { 
                         currentBelt.pc = 0;
@@ -303,7 +187,7 @@ public sealed class SteamMachine
             switch(current.type)
             {
                 case InstructType.UsePump:
-                    if(!pump.Pump(ref boiler, Math.Max(0, current.value)))
+                    if(!pump.Pump(boiler, Math.Max(0, current.value)))
                     {
                         boiler.TakePressure(boiler.releaseValve);
                         continue;
@@ -321,11 +205,11 @@ public sealed class SteamMachine
                 break;
 
                 case InstructType.WaitForPressureHigh:
-                    if(boiler.pressure<current.value*0.1d) { TickEnd(); continue;}
+                    if(boiler.pressure < current.value*0.1d) { TickEnd(); continue;}
                 break;
 
                 case InstructType.WaitForPressureLow:
-                    if(boiler.pressure>current.value*0.1d) { TickEnd(); continue;}
+                    if(boiler.pressure > current.value*0.1d) { TickEnd(); continue;}
                 break;
 
                 case InstructType.Move:
@@ -351,7 +235,7 @@ public sealed class SteamMachine
                 break;
 
                 case InstructType.Press:
-                    if(!press.Press(ref boiler))
+                    if(!press.Press(boiler))
                     {
                         TickEnd();
                         continue;
@@ -395,18 +279,16 @@ public sealed class SteamMachine
 
     private void TickEnd()
     {
-        
-
         if(boiler.selectedContainer > -1)
         {
-            if(boiler.pressure<boiler.releaseValve) 
+            if(boiler.pressure < boiler.releaseValve) 
             {
                 boiler.steamContainers[boiler.selectedContainer] += boiler.pressure;
                 boiler.pressure = 0;
                 boiler.steam = 0;
                 return;
             }
-            else if(boiler.pressure>0)
+            else if(boiler.pressure > 0)
             { 
                 boiler.steamContainers[boiler.selectedContainer] += boiler.releaseValve;
                 boiler.TakePressure(boiler.releaseValve);
