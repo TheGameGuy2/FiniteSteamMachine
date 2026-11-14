@@ -1,6 +1,7 @@
 <h1>Finite Steam Machine</h1>
 
 <p>The creators of VoidPtr present: A language running on a (simulated) steam machine!</p>
+<img src = "images/icon.png" </img>
 <h3>Welcome to the steam age of computing!</h3>
 
 <h2>Setup</h2>
