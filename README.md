@@ -21,7 +21,8 @@
 </ul>
 
 <h2>Instructions</h2>
-<p><i>Info: Arguments enclosed in <code>[</code> <code>]</code> are written as positive or negative integers without brackets.
+<p><i>Info: Arguments are enclosed in <code>[</code> <code>]</code> 
+to distinguish them from the commands. They are written as positive or negative integers without brackets.
 Character literals get converted to their ascii representation and are expected to be enclosed in <code>'</code>.</i></p>
 
 <p>Comments: <code>!! This is a comment </code></p>
