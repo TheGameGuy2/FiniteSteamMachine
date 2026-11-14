@@ -21,9 +21,10 @@
 </ul>
 
 <h2>Instructions</h2>
-<p><i>Info: Arguments enclosed in '[' ']' are written as positive or negative integers without brackets.</i></p>
+<p><i>Info: Arguments enclosed in <code>[</code> <code>]</code> are written as positive or negative integers without brackets.
+Character literals get converted to their ascii representation and are expected to be enclosed in <code>'</code>.</i></p>
 
-<p>Comments: <code>! This is a comment </code></p>
+<p>Comments: <code>!! This is a comment </code></p>
 
 <table border="1" cellpadding="8" cellspacing="0">
 <tr>
@@ -230,6 +231,16 @@ and the <code>press</code> instruction executes the current state. Most instruct
 <td>2bar</td>
 </tr>
 
+<tr>
+<td><code>set_write_chr</code></td>
+<td>2bar</td>
+</tr>
+
+<tr>
+<td><code>set_read_chr</code></td>
+<td>1bar</td>
+</tr>
+
 </table>
 
 <h3>Water Pump</h3>
@@ -240,7 +251,8 @@ and the <code>press</code> instruction executes the current state. Most instruct
 <code>pump [bar]</code><br>
 </p>
 <p>
-The water pump uses pressure to pump water.
+The water pump uses pressure to pump water. 
+Execution gets paused while the current pressure is less than the needed pump pressure.
 </p>
 <p>The conversion rate from pressure to water is <code>added_water = pressure*0.8</code>.</p>
 </p>

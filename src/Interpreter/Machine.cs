@@ -127,14 +127,7 @@ public sealed class SteamMachine
             {
                 DisplayState(moveAmount != 0);
             }
-            else
-            {
-                if(press.consoleOutput != '\0')
-                {  
-                    Console.Write(press.consoleOutput);
-                    press.consoleOutput = '\0';
-                }
-            }
+            
             
             if(tickDelay > 0)
             {

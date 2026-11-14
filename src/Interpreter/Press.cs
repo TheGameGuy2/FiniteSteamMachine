@@ -7,7 +7,6 @@ public sealed class SteamPress
 {
     public Instruction current;
     public Stack<int> pressStack = new(32);
-    public char consoleOutput = '\0';
 
     private readonly double[] instrPressures = new double[32];
     public SteamPress()
@@ -68,7 +67,9 @@ public sealed class SteamPress
             break;
 
             case InstructType.PrintChar:
-                consoleOutput = (char)pressStack.Pop();
+                
+                Console.Write((char)pressStack.Pop());
+                
             break;
 
             case InstructType.ReadChar:

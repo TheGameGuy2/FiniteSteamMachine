@@ -1,0 +1,67 @@
+!! Writing a normal "Hello World" is a bit boring, so lets try to itterate over the letters to print them.
+
+!! The boiler starts of with 10L of water.
+!! We are going to simply use all of it for this example.
+
+coal 40
+
+
+high_pressure_switch 200 !! Waiting for at least 20 bar.
+
+set_put 10
+press
+
+set_put '!'
+press
+
+set_put 'm'
+press
+ 
+set_put 'a'
+press
+
+set_put 'e'
+press
+
+set_put 't'
+press
+
+set_put 'S'
+press
+
+set_put ' '
+press
+
+set_put 'o'
+press
+
+set_put 'l'
+press
+press
+
+set_put 'e'
+press
+
+set_put 'H'
+press
+
+!! We pushed 13 characters onto the stack.
+!! The write instruction costs 2 bar, move belt costs 1 bar per move.
+!! The move instruction gets skipped when steam is less than 1 bar.
+
+!! This leaves us with 4 bar per character, which is 52 bar.
+!! The last character costs us 2 bar less because we skip the move instruction.
+!! This brings us to 50 bar.
+
+pump 10
+coal 50
+pump 25
+
+release_valve 1
+low_pressure_switch 502 !! 50.2 bar, 0.1 for setting the switch (release valve is opened!), 0.1 accounting for rounding errors.
+release_valve 0
+
+set_write_chr
+press !! 2 bar
+
+move_belt -2 !! 2 bar if not skipped.

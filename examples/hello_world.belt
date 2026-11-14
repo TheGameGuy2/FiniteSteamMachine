@@ -1,0 +1,68 @@
+!! Writing a simple "Hello World" programm isn't really a challange, but it demonstrates how the press works,
+!! so we're doing it anyways.
+
+!! Boiler contains 10L of water at the beginning 
+coal 40
+pump 20
+
+set_put 'H'
+press
+set_write_chr
+press
+
+set_put 'e'
+press
+set_write_chr
+press
+
+set_put 'l'
+press
+press
+set_write_chr
+press
+press
+
+set_put 'o'
+press
+set_write_chr
+press
+
+set_put ' '
+press
+set_write_chr
+press
+
+set_put 'W'
+press
+set_write_chr
+press
+
+set_put 'o'
+press
+set_write_chr
+press
+
+set_put 'r'
+press
+set_write_chr
+press
+
+set_put 'l'
+press
+set_write_chr
+press
+
+set_put 'd'
+press
+set_write_chr
+press
+
+set_put '!'
+press
+set_write_chr
+press
+
+set_put 10
+press
+set_write_chr
+press

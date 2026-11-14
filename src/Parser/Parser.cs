@@ -56,10 +56,11 @@ public class Parser
         foreach(string line in code)
         {
             string cline = line.Trim();
-            cline = cline.Split('!')[0]; //remove comments
+            cline = cline.Split("!!", 2)[0]; //remove comments
             cline = cline.Trim();
             
-            string[] instrct = cline.Split(" ");
+            
+            string[] instrct = cline.Split(" ", 2);
 
             
             if(instrct.Length >= 1)
@@ -99,6 +100,20 @@ public class Parser
                         if(int.TryParse(instrct[1], out int result))
                         {
                             MakeInstruction(outInstructions, type, result);
+                        }
+                        else if(instrct[1].StartsWith("'"))
+                        {
+                            string charValue = instrct[1].Replace("'","");
+                            if(charValue.Length == 1)
+                            {
+                                char val = charValue[0];
+                                MakeInstruction(outInstructions, type, val);
+                            }
+                            else
+                            {
+                                throw new($"Invalid character literal in line {lineCount}.");
+                            }
+                            
                         }
                         else if(instrct[1] == "pull") //Is arg dynamic?
                         {
