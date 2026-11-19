@@ -12,7 +12,6 @@ public enum BoilerState
 
 public sealed class Boiler(int containerAmount)
 {
-    //Water in kg, steam out in L
     public double coal, water, steam, pressure, pressureLimit, releaseValve;
     public double[] steamContainers = new double[containerAmount];
     public int selectedContainer = -1;
